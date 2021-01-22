@@ -1,5 +1,6 @@
 const app = require('express')()
 const server = require('http').createServer(app)
+const cors = require('cors')
 const io = require("socket.io")(server)
 const PORT = 3000
 
@@ -8,7 +9,7 @@ let data = {
 }
 let rooms = []
 let propertyRoom = {}
-
+app.use(cors())
 io.on("connection", (socket) => {
     console.log('Socket.Io is connected')
     socket.on('joinRoom', (room) => {
