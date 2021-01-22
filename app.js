@@ -6,9 +6,33 @@ const PORT = 3000
 let data = {
     user: []
 }
+let rooms = []
+let propertyRoom = {}
 
 io.on("connection", (socket) => {
     console.log('Socket.Io is connected')
+    socket.on('joinRoom', (room) => {
+        if (Object.keys(io.sockets.adapter.rooms).includes(room)){
+            let length = Object.keys(io.sockets.adapter.rooms[room].sockets).length
+            if (length !== 2){
+                console.log('room sudah ada')
+                socket.join(room)
+                socket.emit('updateCurrRoom',room)
+                propertyRoom[room]['players'].push(socket.id)
+            } else {
+                //socket.join(room)
+                console.log('masuk')
+                io.emit('isFull',room)
+            }
+        }else{
+            console.log('room belum adass')
+            propertyRoom[room] = {}
+            propertyRoom[room]['players'] = [socket.id]
+            socket.join(room)
+            socket.emit('updateCurrRoom',room)
+            rooms.push(room)
+        }
+    })
 
     socket.emit('init', { message: 'Ini dari server' })
 
@@ -30,10 +54,9 @@ io.on("connection", (socket) => {
                 socket.emit('login', data.user[1])
                 console.log('>>> user login ', data.user)
             }
-            // io.emit('login', payload)
-
         }
     })
+
 })
 
 server.listen(PORT, () => console.log(`listening on PORT ${PORT}`))
